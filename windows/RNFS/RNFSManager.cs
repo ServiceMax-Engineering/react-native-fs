@@ -67,7 +67,7 @@ namespace RNFS
         }
 
        [ReactMethod]
-        public async void writeFile(string filepath, string base64Content, JObject options, IReactPromise<object> promise)
+        public async void writeFile(string filepath, string base64Content, JObject options, IReactPromise<JSValue> promise)
         {
             try
             {
@@ -78,7 +78,7 @@ namespace RNFS
                     await file.WriteAsync(data, 0, data.Length).ConfigureAwait(false);
                 }
 
-                promise.Resolve(null);
+                promise.Resolve(new JSValue());
             }
             catch (Exception ex)
             {
@@ -104,7 +104,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void write(string filepath, string base64Content, int position, IReactPromise<object> promise)
+        public async void write(string filepath, string base64Content, int position, IReactPromise<JSValue> promise)
         {
             try
             {
@@ -120,7 +120,7 @@ namespace RNFS
                     await file.WriteAsync(data, 0, data.Length).ConfigureAwait(false);
                 }
 
-                promise.Resolve(null);
+                promise.Resolve(new JSValue());
             }
             catch (Exception ex)
             {
@@ -129,11 +129,11 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public void exists(string filepath, IReactPromise<object> promise)
+        public void exists(string filepath, IReactPromise<JSValue> promise)
         {
             try
             {
-                promise.Resolve(File.Exists(filepath) || Directory.Exists(filepath));
+                promise.Resolve(new JSValue(File.Exists(filepath) || Directory.Exists(filepath)));
             }
             catch (Exception ex)
             {
@@ -142,7 +142,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void readFile(string filepath, IReactPromise<object> promise)
+        public async void readFile(string filepath, IReactPromise<JSValue> promise)
         {
             try
             {
@@ -162,7 +162,7 @@ namespace RNFS
                     base64Content = Convert.ToBase64String(buffer);
                 }
 
-                promise.Resolve(base64Content);
+                promise.Resolve(new JSValue(base64Content));
             }
             catch (Exception ex)
             {
@@ -171,7 +171,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void read(string filepath, int length, int position, IReactPromise<object> promise)
+        public async void read(string filepath, int length, int position, IReactPromise<JSValue> promise)
         {
             try
             {
@@ -191,7 +191,7 @@ namespace RNFS
                     base64Content = Convert.ToBase64String(buffer);
                 }
 
-                promise.Resolve(base64Content);
+                promise.Resolve(new JSValue(base64Content));
             }
             catch (Exception ex)
             {
@@ -200,7 +200,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void hash(string filepath, string algorithm, IReactPromise<object> promise)
+        public async void hash(string filepath, string algorithm, IReactPromise<JSValue> promise)
         {
             var hashAlgorithmFactory = default(Func<HashAlgorithm>);
             if (!s_hashAlgorithms.TryGetValue(algorithm, out hashAlgorithmFactory))
@@ -238,7 +238,7 @@ namespace RNFS
                         }
                     }
 
-                    promise.Resolve(hexBuilder.ToString());
+                    promise.Resolve(new JSValue(hexBuilder.ToString()));
                 }).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -248,13 +248,13 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public void moveFile(string filepath, string destPath, JObject options, IReactPromise<object> promise)
+        public void moveFile(string filepath, string destPath, JObject options, IReactPromise<JSValue> promise)
         {
             try
             {
                 // TODO: move file on background thread?
                 File.Move(filepath, destPath);
-                promise.Resolve(true);
+                promise.Resolve(new JSValue(true));
             }
             catch (Exception ex)
             {
@@ -269,7 +269,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void readDir(string directory, IReactPromise<object> promise)
+        public async void readDir(string directory, IReactPromise<JSValue> promise)
         {
             try
             {
@@ -285,32 +285,32 @@ namespace RNFS
                         return;
                     }
 
-                    var fileMaps = new JArray();
+                    var fileMaps = new List<JSValue>();
                     foreach (var item in info.EnumerateFileSystemInfos())
                     {
-                        var fileMap = new JObject
+                        var fileMap = new Dictionary<string, JSValue>
                         {
-                            { "mtime", ConvertToUnixTimestamp(item.LastWriteTime) },
-                            { "name", item.Name },
-                            { "path", item.FullName },
+                            { "mtime", new JSValue(ConvertToUnixTimestamp(item.LastWriteTime)) },
+                            { "name", new JSValue(item.Name) },
+                            { "path", new JSValue(item.FullName) },
                         };
 
                         var fileItem = item as FileInfo;
                         if (fileItem != null)
                         {
-                            fileMap.Add("type", FileType);
-                            fileMap.Add("size", fileItem.Length);
+                            fileMap.Add("type", new JSValue(FileType));
+                            fileMap.Add("size", new JSValue(fileItem.Length));
                         }
                         else
                         {
-                            fileMap.Add("type", DirectoryType);
-                            fileMap.Add("size", 0);
+                            fileMap.Add("type", new JSValue(DirectoryType));
+                            fileMap.Add("size", new JSValue(0));
                         }
 
-                        fileMaps.Add(fileMap);
+                        fileMaps.Add(new JSValue(fileMap));
                     }
 
-                    promise.Resolve(fileMaps);
+                    promise.Resolve(new JSValue(fileMaps));
                 });
             }
             catch (Exception ex)
@@ -320,7 +320,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public void stat(string filepath, IReactPromise<object> promise)
+        public void stat(string filepath, IReactPromise<JSValue> promise)
         {
             try
             {
@@ -339,15 +339,15 @@ namespace RNFS
                 }
 
                 var fileInfo = fileSystemInfo as FileInfo;
-                var statMap = new JObject
+                var statMap = new Dictionary<string, JSValue>
                 {
-                    { "ctime", ConvertToUnixTimestamp(fileSystemInfo.CreationTime) },
-                    { "mtime", ConvertToUnixTimestamp(fileSystemInfo.LastWriteTime) },
-                    { "size", fileInfo?.Length ?? 0 },
-                    { "type", fileInfo != null ? FileType: DirectoryType },
+                    { "ctime", new JSValue(ConvertToUnixTimestamp(fileSystemInfo.CreationTime)) },
+                    { "mtime", new JSValue(ConvertToUnixTimestamp(fileSystemInfo.LastWriteTime)) },
+                    { "size", new JSValue(fileInfo?.Length ?? 0) },
+                    { "type", new JSValue(fileInfo != null ? FileType: DirectoryType) },
                 };
 
-                promise.Resolve(statMap);
+                promise.Resolve(new JSValue(statMap));
             }
             catch (Exception ex)
             {
@@ -356,7 +356,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void unlink(string filepath, IReactPromise<object> promise)
+        public async void unlink(string filepath, IReactPromise<JSValue> promise)
         {
             try
             {
@@ -379,7 +379,7 @@ namespace RNFS
                     return;
                 }
 
-                promise.Resolve(null);
+                promise.Resolve(new JSValue());
             }
             catch (Exception ex)
             {
@@ -388,12 +388,12 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void mkdir(string filepath, JObject options, IReactPromise<object> promise)
+        public async void mkdir(string filepath, JObject options, IReactPromise<JSValue> promise)
         {
             try
             {
                 await Task.Run(() => Directory.CreateDirectory(filepath)).ConfigureAwait(false);
-                promise.Resolve(null);
+                promise.Resolve(new JSValue());
             }
             catch (Exception ex)
             {
@@ -402,7 +402,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public void downloadFile(JObject options, IReactPromise<object> promise)
+        public void downloadFile(JObject options, IReactPromise<JSValue> promise)
         {
             var filepath = options.Value<string>("toFile");
 
@@ -463,7 +463,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void touch(string filepath, double mtime, double ctime, IReactPromise<object> promise)
+        public async void touch(string filepath, double mtime, double ctime, IReactPromise<JSValue> promise)
         {
             try
             {
@@ -478,7 +478,7 @@ namespace RNFS
                     fileInfo.CreationTimeUtc = ConvertFromUnixTimestamp(ctime);
                     fileInfo.LastWriteTimeUtc = ConvertFromUnixTimestamp(mtime);
 
-                    promise.Resolve(fileInfo.FullName);
+                    promise.Resolve(new JSValue(fileInfo.FullName));
                 });
             }
             catch (Exception ex)
@@ -555,7 +555,7 @@ namespace RNFS
             }
         }
 
-        private void Reject(IReactPromise<object> promise, String filepath, Exception ex)
+        private void Reject(IReactPromise<JSValue> promise, String filepath, Exception ex)
         {
             if (ex is FileNotFoundException) {
                 RejectFileNotFound(promise, filepath);
@@ -566,7 +566,7 @@ namespace RNFS
             promise.Reject(error);
         }
 
-        private void RejectFileNotFound(IReactPromise<object> promise, String filepath)
+        private void RejectFileNotFound(IReactPromise<JSValue> promise, String filepath)
         {
             ReactError error = new ReactError();
             error.Message = "ENOENT: no such file or directory, open '" + filepath + "'";
