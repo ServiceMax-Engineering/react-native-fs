@@ -96,7 +96,7 @@ namespace RNFS
         public async void appendFile(string filepath, string base64Content)
         {
             // TODO: open file on background thread?
-            using (var file = File.Open(filepath, FileMode.Append))
+            using (var file = File.Open(filepath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
             {
                 var data = Convert.FromBase64String(base64Content);
                 await file.WriteAsync(data, 0, data.Length).ConfigureAwait(false);
