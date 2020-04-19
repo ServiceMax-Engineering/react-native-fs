@@ -416,7 +416,8 @@ namespace RNFS
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
                 foreach (var header in headers)
                 {
-                    request.Headers.Add(header.Key, header.Value.Value<string>());
+                    //TODO:
+                    //request.Headers.Add(header.Key, header.Value.Value<string>());
                 }
 
                 //await _tasks.AddAndInvokeAsync(jobId, token => 
@@ -449,8 +450,9 @@ namespace RNFS
 
                 promise.Resolve(new JObject
                 {
-                    { "freeSpace", (ulong)properties["System.FreeSpace"] },
-                    { "totalSpace", (ulong)properties["System.Capacity"] },
+                    //TODO:
+                    //{ "freeSpace", (ulong)properties["System.FreeSpace"] },
+                    //{ "totalSpace", (ulong)properties["System.Capacity"] },
                 });
             }
             catch (Exception)
@@ -486,7 +488,8 @@ namespace RNFS
                 Reject(promise, filepath, ex);
             }
         }
-
+        //TODO
+        /*
         private async Task ProcessRequestAsync(IReactPromise<object> promise, HttpRequestMessage request, string filepath, int jobId, int progressIncrement, CancellationToken token)
         {
             try
@@ -554,7 +557,7 @@ namespace RNFS
                 request.Dispose();
             }
         }
-
+        */
         private void Reject(IReactPromise<JSValue> promise, String filepath, Exception ex)
         {
             if (ex is FileNotFoundException) {
