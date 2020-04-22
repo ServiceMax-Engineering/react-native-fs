@@ -67,7 +67,7 @@ namespace RNFS
         }
 
        [ReactMethod]
-        public async void writeFile(string filepath, string base64Content, JObject options, IReactPromise<JSValue> promise)
+        public async void writeFile(string filepath, string base64Content, JSValue options, IReactPromise<JSValue> promise)
         {
             try
             {
@@ -248,7 +248,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public void moveFile(string filepath, string destPath, JObject options, IReactPromise<JSValue> promise)
+        public void moveFile(string filepath, string destPath, JSValue options, IReactPromise<JSValue> promise)
         {
             try
             {
@@ -263,7 +263,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void copyFile(string filepath, string destPath, JObject options)
+        public async void copyFile(string filepath, string destPath, JSValue options)
         {
             await Task.Run(() => File.Copy(filepath, destPath)).ConfigureAwait(false);
         }
@@ -388,7 +388,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void mkdir(string filepath, JObject options, IReactPromise<JSValue> promise)
+        public async void mkdir(string filepath, JSValue options, IReactPromise<JSValue> promise)
         {
             try
             {
