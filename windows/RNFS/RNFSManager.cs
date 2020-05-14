@@ -263,9 +263,10 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void copyFile(string filepath, string destPath, JSValue options)
+        public async void copyFile(string filepath, string destPath, IReactPromise<JSValue> promise)
         {
-            await Task.Run(() => File.Copy(filepath, destPath)).ConfigureAwait(false);
+            await Task.Run(() => File.Copy(filepath, destPath)).ConfigureAwait(true);
+            promise.Resolve(true);
         }
 
         [ReactMethod]
