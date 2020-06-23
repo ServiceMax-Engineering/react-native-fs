@@ -86,10 +86,10 @@ namespace RNFS
             }
         }
 
-        [ReactMethod] public void createFile(string filepath, IReactPromise<object> promise)
+        [ReactMethod] public void createFile(string filepath, IReactPromise<JSValue> promise)
         {
             using (var file = File.Create(filepath)) { };
-            promise.Resolve(null);
+            promise.Resolve(new JSValue());
         }
 
         [ReactMethod]
@@ -138,6 +138,19 @@ namespace RNFS
             catch (Exception ex)
             {
                 Reject(promise, filepath, ex);
+            }
+        }
+
+        [ReactMethod]
+        public void isDir(string dirpath, IReactPromise<JSValue> promise)
+        {
+            try
+            {
+                promise.Resolve(new JSValue(Directory.Exists(dirpath)));
+            }
+            catch (Exception ex)
+            {
+                Reject(promise, dirpath, ex);
             }
         }
 
