@@ -285,11 +285,6 @@ namespace RNFS
                     RejectFileNotFound(promise, filepath);
                     return;
                 }
-                if (!(Directory.Exists(destPath)))
-                {
-                    RejectFileNotFound(promise, destPath);
-                    return;
-                }
                 await Task.Run(() => File.Copy(filepath, destPath)).ConfigureAwait(true);
                 promise.Resolve(true);
             }
