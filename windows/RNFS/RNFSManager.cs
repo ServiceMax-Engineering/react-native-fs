@@ -398,11 +398,11 @@ namespace RNFS
                 }
                 else
                 {
-                    ReactError error = new ReactError();
-                    error.Code = null;
-                    error.Message = "File does not exist";
-                    promise.Reject(error);
-                    return;
+                    // ReactError error = new ReactError();
+                    // error.Code = null;
+                    // error.Message = "File does not exist";
+                    // promise.Reject(error);
+                    // return;
                 }
 
                 promise.Resolve(new JSValue());
